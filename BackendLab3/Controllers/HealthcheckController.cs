@@ -8,11 +8,11 @@ namespace BackendLab3.Controllers;
 public class HealthcheckController : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<Healthcheck>> HealthCheck()
+    public ActionResult<Healthcheck> HealthCheck()
     {
         try
         {
-            var status = await HealthCheck();
+            var status = new Healthcheck();
             return Ok(status);
         }
         catch (Exception)
