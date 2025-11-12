@@ -16,7 +16,7 @@ public partial class AppDbContext(
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 
-        => optionsBuilder.UseSqlite(config.GetConnectionString("DefaultConnection"));
+        => optionsBuilder.UseNpgsql(config.GetConnectionString("DefaultConnection"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
