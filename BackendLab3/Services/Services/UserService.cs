@@ -1,5 +1,4 @@
 ﻿using BackendLab3.Context;
-using BackendLab3.Interfaces.Services;
 using BackendLab3.Models;
 using BackendLab3.Services.Dto.User;
 using BackendLab3.Services.Interfaces;
@@ -21,6 +20,9 @@ public class UserService(AppDbContext context) : IUserService
                 u => u.Username == dto.Username || u.Email == dto.Email);
         if (existingUser is not null)
             throw new Exception("User with respective username or email already exist.");
+
+        if (await context.Currencies.FindAsync(dto.DefaultCurrencyId) is null)
+            throw new KeyNotFoundException("Default currency not exist.");
         
         var newUser = new User
         {

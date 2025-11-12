@@ -1,7 +1,7 @@
 ﻿using BackendLab3.Context;
-using BackendLab3.Interfaces.Services;
 using BackendLab3.Models;
 using BackendLab3.Services.Dto.Expense;
+using BackendLab3.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendLab3.Services.Services;
@@ -34,7 +34,7 @@ public class ExpensesService(AppDbContext context) : IExpensesService
         return expenseId;
     }
 
-    public async Task UpdateAsync(int id, UpdateCurrencyDto dto)
+    public async Task UpdateAsync(int id, UpdateExpenseDto dto)
     {
         var existing = await context.Expenses.FindAsync(id);
         if (existing is null)

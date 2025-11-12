@@ -1,6 +1,6 @@
 ﻿namespace BackendLab3.Services.Dto.Expense;
 
-public record UpdateCurrencyDto
+public record UpdateExpenseDto
 {
     public required string? Description { get; set; } = null!;
     public required decimal? Amount { get; set; }
