@@ -1,12 +1,67 @@
 ﻿using BackendLab3.Context;
 using BackendLab3.Interfaces.Services;
 using BackendLab3.Models;
+using BackendLab3.Services.Dto.User;
+using BackendLab3.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendLab3.Services.Services;
 
 public class UserService(AppDbContext context) : IUserService
 {
+    public async Task<IEnumerable<User>> ListUsers()
+    {
+        return await context.Users.ToListAsync();
+    }
+
+    public async Task<int> CreateAsync(CreateUserDto dto)
+    {
+        var existingUser =
+            await context.Users.FirstOrDefaultAsync(
+                u => u.Username == dto.Username || u.Email == dto.Email);
+        if (existingUser is not null)
+            throw new Exception("User with respective username or email already exist.");
+        
+        var newUser = new User
+        {
+            Username = dto.Username,
+            Email = dto.Email,
+            DefaultCurrencyId = dto.DefaultCurrencyId,
+        };
+
+        await context.Users.AddAsync(newUser);
+        return await context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(int id, UpdateUserDto dto)
+    {
+        var existingUser = await context.Users.FindAsync(id);
+        if (existingUser is null)
+            throw new KeyNotFoundException($"User with id {id} not found.");
+        
+        if (dto.Username is not null || dto.Email is not null)
+        {
+            var duplicateUser = await context.Users
+                .Where(u => u.Id != id && 
+                            (u.Username == dto.Username || u.Email == dto.Email))
+                .FirstOrDefaultAsync();
+
+            if (duplicateUser is not null)
+                throw new Exception("Another user with the same username or email already exists.");
+        }
+        
+        if (dto.Username is not null)
+            existingUser.Username = dto.Username;
+
+        if (dto.Email is not null)
+            existingUser.Email = dto.Email;
+
+        if (dto.DefaultCurrencyId.HasValue)
+            existingUser.DefaultCurrencyId = dto.DefaultCurrencyId.Value;
+
+        await context.SaveChangesAsync();
+    }
+
     public async Task<Currency> GetDefaultCurrencyAsync(int userId)
     {
         var user = await context.Users
@@ -26,6 +81,15 @@ public class UserService(AppDbContext context) : IUserService
             throw new Exception("User not found.");
 
         user.DefaultCurrencyId = currencyId;
+        await context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var found = await context.Users.FindAsync(id);
+        if (found is null)
+            throw new KeyNotFoundException("User not found.");
+        context.Remove(found);
         await context.SaveChangesAsync();
     }
 }

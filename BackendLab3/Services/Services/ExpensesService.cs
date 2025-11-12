@@ -1,17 +1,27 @@
 ﻿using BackendLab3.Context;
-using BackendLab3.Interfaces.Dto;
 using BackendLab3.Interfaces.Services;
 using BackendLab3.Models;
+using BackendLab3.Services.Dto.Expense;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendLab3.Services.Services;
 
 public class ExpensesService(AppDbContext context) : IExpensesService
 {
+    public async Task<IEnumerable<Expense>> ListAsync()
+    {
+        return await context.Expenses.ToListAsync();
+    }
+
+    public async Task<Expense?> GetByIdAsync(int id, int userId)
+    {
+        return await context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+    }
+
     public async Task<int> CreateAsync(int userId, CreateExpenseDto dto)
     {
         var expense = new Expense()
-        {   
+        {
             Description = dto.Description,
             Amount = dto.Amount,
             Date = dto.Date,
@@ -24,8 +34,26 @@ public class ExpensesService(AppDbContext context) : IExpensesService
         return expenseId;
     }
 
-    public async Task<Expense?> GetByIdAsync(int id, int userId)
+    public async Task UpdateAsync(int id, UpdateCurrencyDto dto)
     {
-        return await context.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+        var existing = await context.Expenses.FindAsync(id);
+        if (existing is null)
+            throw new KeyNotFoundException("Expense not found");
+
+        existing.Description = dto.Description ?? existing.Description;
+        existing.Amount = dto.Amount ?? existing.Amount;
+        existing.Date = dto.Date ?? existing.Date;
+        existing.CurrencyId = dto.CurrencyId ?? existing.CurrencyId;
+
+        await context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var found = await context.Expenses.FindAsync(id);
+        if (found is null)
+            throw new KeyNotFoundException("Expense not found.");
+        context.Expenses.Remove(found);
+        await context.SaveChangesAsync();
     }
 }

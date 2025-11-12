@@ -3,23 +3,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BackendLab3.Context;
 
-public partial class AppDbContext : DbContext
+public partial class AppDbContext(
+    DbContextOptions<AppDbContext> options, 
+    IConfiguration config
+    )
+    : DbContext(options)
 {
-    private IConfiguration _config;
-
-    public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration config)
-        : base(options)
-    {
-        _config = config;
-    }
-    
     public DbSet<User> Users => Set<User>();
     public DbSet<Expense> Expenses => Set<Expense>();
     public DbSet<Currency> Currencies => Set<Currency>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 
-        => optionsBuilder.UseSqlite(_config.GetConnectionString("DefaultConnection"));
+        => optionsBuilder.UseSqlite(config.GetConnectionString("DefaultConnection"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

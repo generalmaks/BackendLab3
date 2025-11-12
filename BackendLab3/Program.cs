@@ -1,5 +1,6 @@
 using BackendLab3.Context;
 using BackendLab3.Interfaces.Services;
+using BackendLab3.Services.Interfaces;
 using BackendLab3.Services.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +21,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUi();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
